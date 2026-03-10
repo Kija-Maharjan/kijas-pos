@@ -460,7 +460,7 @@ header{background:var(--white);border-bottom:1px solid var(--border);height:56px
 <div id="pinOverlay">
   <div class="pin-box">
     <div class="pin-logo">&#9749;</div>
-    <div class="pin-title">Trio's Cafe</div>
+    <div class="pin-title">Nepal Food Factory</div>
     <div class="pin-sub">ENTER STAFF PIN TO CONTINUE</div>
     <div class="pin-dots">
       <div class="pin-dot" id="pd0"></div>
@@ -1046,7 +1046,7 @@ function printDailyReport(day,dateStr){
   const catMap=isToday?(data?.catMap||{}):(day?.category_totals||{});
   const tableMap=isToday?(data?.tableMap||{}):(day?.table_totals||{});
   const todayFmt=new Date().toLocaleDateString('en-NP',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
-  document.getElementById('printReport').innerHTML=`<div class="print-section"><div class="print-title">Trio's Cafe - Sales Report</div><div class="print-subtitle">${isToday?todayFmt:dateStr} &middot; Printed: ${new Date().toLocaleString()}</div><table class="print-table"><tr><th>Revenue</th><th>Orders</th><th>Avg</th></tr><tr><td><strong>Rs. ${revenue}</strong></td><td>${orderCount}</td><td>Rs. ${avgOrder}</td></tr></table></div><div class="print-section"><div class="print-h2">Top Items</div><table class="print-table"><thead><tr><th>#</th><th>Item</th><th>Qty</th><th>Revenue</th></tr></thead><tbody>${topItems.slice(0,10).map(([n,v],i)=>`<tr><td>${i+1}</td><td>${n}</td><td>${v.qty}</td><td>Rs.${v.rev}</td></tr>`).join('')}</tbody></table></div>`;
+  document.getElementById('printReport').innerHTML=`<div class="print-section"><div class="print-title">Nepal Food Factory - Sales Report</div><div class="print-subtitle">${isToday?todayFmt:dateStr} &middot; Printed: ${new Date().toLocaleString()}</div><table class="print-table"><tr><th>Revenue</th><th>Orders</th><th>Avg</th></tr><tr><td><strong>Rs. ${revenue}</strong></td><td>${orderCount}</td><td>Rs. ${avgOrder}</td></tr></table></div><div class="print-section"><div class="print-h2">Top Items</div><table class="print-table"><thead><tr><th>#</th><th>Item</th><th>Qty</th><th>Revenue</th></tr></thead><tbody>${topItems.slice(0,10).map(([n,v],i)=>`<tr><td>${i+1}</td><td>${n}</td><td>${v.qty}</td><td>Rs.${v.rev}</td></tr>`).join('')}</tbody></table></div>`;
   window.print();
 }
 

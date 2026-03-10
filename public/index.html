@@ -79,11 +79,11 @@ header{background:var(--white);border-bottom:1px solid var(--border);height:56px
 #bulkBar{display:none;align-items:center;gap:10px;padding:6px 1.2rem;background:#FFF8E1;border-bottom:1px solid #FFE082;flex-shrink:0}
 #bulkBar.show{display:flex}
 #bulkCount{font-size:.74rem;color:var(--gold);font-weight:600}
-.hist-col-heads{display:grid;grid-template-columns:26px 66px 1fr 46px 64px 50px 88px 24px;gap:.4rem;padding:.38rem 1.2rem;background:var(--bg);font-size:.57rem;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);font-weight:600;flex-shrink:0;border-bottom:1px solid var(--border)}
+.hist-col-heads{display:grid;grid-template-columns:26px 66px 1fr 46px 64px 50px 88px 80px 24px;gap:.4rem;padding:.38rem 1.2rem;background:var(--bg);font-size:.57rem;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);font-weight:600;flex-shrink:0;border-bottom:1px solid var(--border)}
 .hist-body{overflow-y:auto;flex:1}
 .order-block{border-bottom:1px solid var(--border)}
 .order-block:last-child{border-bottom:none}
-.order-block-head{display:grid;grid-template-columns:26px 66px 1fr 46px 64px 50px 88px 24px;gap:.4rem;padding:.72rem 1.2rem;cursor:pointer;align-items:center;transition:background .12s}
+.order-block-head{display:grid;grid-template-columns:26px 66px 1fr 46px 64px 50px 88px 80px 24px;gap:.4rem;padding:.72rem 1.2rem;cursor:pointer;align-items:center;transition:background .12s}
 .order-block-head:hover,.order-block.expanded .order-block-head{background:var(--bg)}
 .ob-id{font-weight:700;color:var(--text);font-size:.76rem}
 .ob-name{font-size:.76rem;color:var(--text);font-weight:500}
@@ -102,7 +102,12 @@ header{background:var(--white);border-bottom:1px solid var(--border);height:56px
 .detail-row .dp{color:var(--text);font-weight:600;width:62px;text-align:right}
 .detail-totals{display:flex;justify-content:flex-end;margin-top:.55rem;padding-top:.45rem;border-top:1px solid var(--border)}
 .dt-val{font-size:.86rem;font-weight:700;color:var(--text)}
-.detail-meta{font-size:.62rem;color:var(--muted);margin-top:.38rem;display:flex;gap:.8rem}
+.detail-meta{font-size:.62rem;color:var(--muted);margin-top:.38rem;display:flex;gap:.8rem;align-items:center}
+.served-badge{display:inline-flex;align-items:center;gap:5px;font-size:.65rem;font-weight:700;padding:3px 10px;border-radius:20px;cursor:pointer;transition:all .18s;letter-spacing:.04em;border:none;font-family:'DM Sans',sans-serif}
+.served-badge.unserved{background:#FDE8E8;color:var(--red);border:1px solid #F5C0C0}
+.served-badge.served{background:#E8F5E9;color:#2E7D32;border:1px solid #A5D6A7}
+.served-badge:hover{opacity:.8;transform:scale(1.04)}
+
 .no-orders{padding:3rem;text-align:center;color:var(--muted);font-size:.8rem;opacity:.5}
 /* FLOAT CART */
 #floatCartBtn{position:fixed;bottom:28px;right:28px;z-index:999;background:var(--text);color:#fff;border:none;border-radius:50px;padding:0 20px;height:52px;display:flex;align-items:center;gap:10px;font-family:'DM Sans',sans-serif;font-size:.88rem;font-weight:600;cursor:pointer;box-shadow:0 6px 24px rgba(0,0,0,.22);transition:all .2s;min-width:64px;justify-content:center}
@@ -342,7 +347,7 @@ header{background:var(--white);border-bottom:1px solid var(--border);height:56px
       </div>
       <div class="hist-col-heads">
         <div><input type="checkbox" id="selectAllOrders" onchange="toggleSelectAll(this)" style="cursor:pointer;width:12px;height:12px;accent-color:var(--text)"></div>
-        <div>Order ID</div><div>Customer</div><div>Table</div><div>Time</div><div>Items</div><div style="text-align:right">Total</div><div></div>
+        <div>Order ID</div><div>Customer</div><div>Table</div><div>Time</div><div>Items</div><div style="text-align:right">Total</div><div>Status</div><div></div>
       </div>
       <div class="hist-body" id="histBody"></div>
     </div>
@@ -653,6 +658,29 @@ let currentCat='momo',cart=[],history=[],orderNum=100,tableOrders={};
 setInterval(()=>{document.getElementById('clk').textContent=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});},1000);
 document.getElementById('clk').textContent=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
 
+
+// ── NOTIFICATION SOUND ──
+const _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+function playOrderSound() {
+  try {
+    const ctx = _audioCtx;
+    if (ctx.state === 'suspended') ctx.resume();
+    // Elegant two-tone chime for a high-end restaurant
+    [[880, 0, 0.15], [1108, 0.18, 0.15], [1320, 0.36, 0.22]].forEach(([freq, delay, dur]) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, ctx.currentTime + delay);
+      gain.gain.setValueAtTime(0, ctx.currentTime + delay);
+      gain.gain.linearRampToValueAtTime(0.18, ctx.currentTime + delay + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay + dur + 0.4);
+      osc.start(ctx.currentTime + delay);
+      osc.stop(ctx.currentTime + delay + dur + 0.5);
+    });
+  } catch(e) {}
+}
+
 function switchMainTab(tab){
   document.getElementById('tabMenu').classList.toggle('active',tab==='menu');
   document.getElementById('tabHistory').classList.toggle('active',tab==='history');
@@ -763,7 +791,7 @@ function placeOrder(){
     });
 }
 function resetSession(){clearCart();document.getElementById('custName').value='';document.getElementById('tableNo').value='';}
-function showToast(oid,table,total){
+function showToast(oid,table,total){ playOrderSound();
   const t=document.getElementById('orderToast');
   document.getElementById('orderToastMsg').textContent='Order '+oid+' placed! Table '+table+' \u00B7 Rs. '+total;
   t.style.opacity='1';t.style.transform='translateX(-50%) translateY(0)';
@@ -781,6 +809,12 @@ function updateHistStats(){
   document.getElementById('hOrders').textContent=history.length;
   document.getElementById('hRevenue').textContent='Rs. '+rev;
 }
+
+const servedOrders = {};
+function toggleServed(idx) {
+  servedOrders[idx] = !servedOrders[idx];
+  renderOrderList();
+}
 function renderOrderList(){
   const body=document.getElementById('histBody');
   if(!history.length){body.innerHTML='<div class="no-orders">No orders placed yet today.</div>';return;}
@@ -792,7 +826,8 @@ function renderOrderList(){
     const dbId=o.id||null;
     const oid=typeof dbId==='number'?'#'+String(dbId).padStart(4,'0'):(o.id||'—');
     const time=o.created_at?new Date(o.created_at).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):'—';
-    return `<div class="order-block expanded" id="ob${i}" data-dbid="${dbId||''}">
+    const isServed = servedOrders[i] || false;
+    return `<div class="order-block expanded" id="ob${i}" data-dbid="${dbId||''}" style="border-left:3px solid ${isServed?'#4CAF50':'#E53935'}">
       <div class="order-block-head">
         <div onclick="event.stopPropagation()"><input type="checkbox" class="order-cb" data-dbid="${dbId||''}" data-idx="${i}" onchange="onCbChange()" style="cursor:pointer;width:12px;height:12px;accent-color:var(--text)"></div>
         <div class="ob-id" onclick="toggleBlock(${i})">${oid}</div>
@@ -801,13 +836,14 @@ function renderOrderList(){
         <div class="ob-count" onclick="toggleBlock(${i})">${time}</div>
         <div class="ob-count" onclick="toggleBlock(${i})">${items.reduce((s,c)=>s+(c.qty||1),0)}</div>
         <div class="ob-total" onclick="toggleBlock(${i})">Rs. ${total}</div>
+        <button class="served-badge ${isServed?'served':'unserved'}" onclick="event.stopPropagation();toggleServed(${i})" style="font-size:.6rem;padding:2px 8px">${isServed?'✓ Served':'● Pending'}</button>
         <div onclick="event.stopPropagation();deleteSingle(${typeof dbId==='number'?dbId:'null'},${i})" style="cursor:pointer;text-align:center;color:var(--red);font-size:.88rem;padding:2px 3px" title="Delete">&#128465;</div>
       </div>
       <div class="order-items-detail">
         <div style="font-size:.56rem;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:.45rem;font-weight:600">Items &mdash; ${time}</div>
         ${items.map(c=>`<div class="detail-row"><div class="de">${c.emoji||'\u{1F37D}'}</div><div class="dn">${c.name}</div><div class="dq">&times;${c.qty||1}</div><div class="du">Rs.${c.price} each</div><div class="dp">Rs. ${c.price*(c.qty||1)}</div></div>`).join('')}
         <div class="detail-totals"><div class="dt-val">Total: Rs. ${total}</div></div>
-        <div class="detail-meta"><span>&#128336; ${time}</span><span>&#129681; Table ${table}</span><span>&#128100; ${name}</span></div>
+        <div class="detail-meta"><span>&#128336; ${time}</span><span>&#129681; Table ${table}</span><span>&#128100; ${name}</span><button class="served-badge ${isServed?'served':'unserved'}" onclick="event.stopPropagation();toggleServed(${i})">${isServed?'✓ Served':'● Unserved'}</button></div>
       </div>
     </div>`;
   }).join('');

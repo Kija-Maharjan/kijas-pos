@@ -49,6 +49,7 @@ function placeOrder() {
 
 // ── Toast notification ────────────────
 function showOrderToast(oid, name, table, total) {
+  playOrderSound();
   const toast = document.getElementById('orderToast');
   document.getElementById('orderToastMsg').textContent = `Order ${oid} placed! Table ${table} · Rs. ${total}`;
   toast.style.opacity = '1';

@@ -81,6 +81,34 @@ function clearCart() {
   renderGrid(MENU[currentCat].items);
 }
 
+// ── Render 50% live order view ────────
+function renderOrderView() {
+  const total = cart.reduce((s, c) => s + c.price * c.qty, 0);
+  const count = cart.reduce((s, c) => s + c.qty, 0);
+  const stats = document.getElementById('ovStats');
+  const body  = document.getElementById('ovBody');
+  const totalRow = document.getElementById('ovTotalRow');
+  const ovTotal  = document.getElementById('ovTotal');
+
+  if (!cart.length) {
+    stats.textContent = '—';
+    body.innerHTML = '<div class="ov-empty">Cart is empty</div>';
+    totalRow.style.display = 'none';
+    return;
+  }
+
+  stats.textContent = count + ' item' + (count !== 1 ? 's' : '');
+  body.innerHTML = cart.map(c => `
+    <div class="ov-item">
+      <div class="ov-emoji">${c.emoji}</div>
+      <div class="ov-name">${c.name}</div>
+      <div class="ov-qty">${c.qty}</div>
+      <div class="ov-price">Rs. ${c.price * c.qty}</div>
+    </div>`).join('');
+  totalRow.style.display = 'flex';
+  ovTotal.textContent = 'Rs. ' + total;
+}
+
 // ── Render cart panel ─────────────────
 function renderCart() {
   const sub   = cart.reduce((s, c) => s + c.price * c.qty, 0);
@@ -95,6 +123,7 @@ function renderCart() {
     </div>`;
     document.getElementById('tTotal').textContent = 'Rs. 0';
     syncMobileCart();
+    renderOrderView();
     return;
   }
 
@@ -115,6 +144,7 @@ function renderCart() {
 
   document.getElementById('tTotal').textContent = 'Rs. ' + sub;
   syncMobileCart();
+  renderOrderView();
 }
 
 // ── Mobile cart sync ──────────────────

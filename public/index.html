@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Nepal Food Factory — POS</title>
+<title>Trio's Cafe — POS</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -248,7 +248,7 @@ header{background:var(--white);border-bottom:1px solid var(--border);height:56px
 <header>
   <div class="logo">
     <div class="logo-icon">&#9749;</div>
-    <div class="logo-name">Nepal Food Factory<small class="logo-sub">Point of Sale &middot; Kathmandu</small></div>
+    <div class="logo-name">Trio's Cafe<small class="logo-sub">Point of Sale &middot; Kathmandu</small></div>
   </div>
   <div class="header-right">
     <div class="clk">&#128336; <span id="clk"></span></div>
@@ -792,7 +792,7 @@ function renderOrderList(){
     const dbId=o.id||null;
     const oid=typeof dbId==='number'?'#'+String(dbId).padStart(4,'0'):(o.id||'—');
     const time=o.created_at?new Date(o.created_at).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):'—';
-    return `<div class="order-block" id="ob${i}" data-dbid="${dbId||''}">
+    return `<div class="order-block expanded" id="ob${i}" data-dbid="${dbId||''}">
       <div class="order-block-head">
         <div onclick="event.stopPropagation()"><input type="checkbox" class="order-cb" data-dbid="${dbId||''}" data-idx="${i}" onchange="onCbChange()" style="cursor:pointer;width:12px;height:12px;accent-color:var(--text)"></div>
         <div class="ob-id" onclick="toggleBlock(${i})">${oid}</div>

@@ -1,0 +1,16 @@
+{
+  "name": "trios-cafe-pos",
+  "version": "2.0.0",
+  "description": "Nepal Food Factory Point of Sale System",
+  "scripts": {
+    "dev":   "vercel dev",
+    "build": "echo 'Static project — no build step'",
+    "start": "vercel dev"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.38.4"
+  },
+  "devDependencies": {
+    "vercel": "^32.0.0"
+  }
+}

@@ -1,24 +1,17 @@
-// ══════════════════════════════════════
-// api/daily.js  —  Daily summaries CRUD
-// Uses Supabase table: daily_summaries
-// ══════════════════════════════════════
-
 import { createClient } from '@supabase/supabase-js';
 
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_ANON_KEY
-);
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
   if (req.method === 'OPTIONS') return res.status(200).end();
 
   try {
-    // ── GET all past daily summaries ──
     if (req.method === 'GET') {
+      // Return all past daily summaries newest first
       const { data, error } = await supabase
         .from('daily_summaries')
         .select('*')
@@ -27,11 +20,11 @@ export default async function handler(req, res) {
       return res.status(200).json(data || []);
     }
 
-    // ── POST upsert daily summary ──
     if (req.method === 'POST') {
       const { date, total_revenue, total_orders, top_items, category_totals, table_totals } = req.body;
       if (!date) return res.status(400).json({ error: 'date required' });
 
+      // Upsert — if date already exists, update it
       const { data, error } = await supabase
         .from('daily_summaries')
         .upsert([{ date, total_revenue, total_orders, top_items, category_totals, table_totals }], { onConflict: 'date' })

@@ -1,6 +1,4 @@
-// api/health.js  —  Health check endpoint
-
-export default function handler(req, res) {
+export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.status(200).json({ status: 'ok', message: "Nepal Food Factory POS API is running" });
+  res.status(200).json({ status: 'ok', message: 'Trio\'s Cafe POS API is running' });
 }

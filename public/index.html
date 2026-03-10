@@ -232,8 +232,33 @@ header{background:var(--white);border-bottom:1px solid var(--border);height:56px
 }
 ::-webkit-scrollbar{width:3px;height:3px}
 ::-webkit-scrollbar-thumb{background:var(--border-strong);border-radius:3px}
+@keyframes shakeX{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
 @keyframes fadeUp{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
 .fade{animation:fadeUp .22s ease both}
+
+/* PIN LOGIN */
+#pinOverlay{position:fixed;inset:0;z-index:9999;background:#1A1A18;display:flex;align-items:center;justify-content:center;flex-direction:column}
+.pin-box{background:#fff;border-radius:20px;padding:2.5rem 2rem;width:320px;text-align:center;box-shadow:0 24px 64px rgba(0,0,0,.4)}
+.pin-logo{width:48px;height:48px;background:var(--text);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.4rem;color:#fff;margin:0 auto 1rem}
+.pin-title{font-family:'DM Serif Display',serif;font-size:1.5rem;color:var(--text);margin-bottom:.25rem}
+.pin-sub{font-size:.72rem;color:var(--muted);margin-bottom:1.5rem;letter-spacing:.04em}
+.pin-dots{display:flex;justify-content:center;gap:12px;margin-bottom:1.5rem}
+.pin-dot{width:14px;height:14px;border-radius:50%;background:var(--border);transition:all .2s}
+.pin-dot.filled{background:var(--text)}
+.pin-dot.error{background:var(--red)}
+.pin-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:.8rem}
+.pin-key{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:1rem;font-family:'DM Serif Display',serif;font-size:1.3rem;color:var(--text);cursor:pointer;transition:all .15s;width:100%}
+.pin-key:hover{background:var(--text);color:#fff;border-color:var(--text)}
+.pin-key:active{transform:scale(.95)}
+.pin-key.zero{grid-column:2}
+.pin-clear{background:none;border:none;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:.78rem;cursor:pointer;padding:.5rem;transition:color .15s}
+.pin-clear:hover{color:var(--red)}
+.pin-error{font-size:.72rem;color:var(--red);margin-top:.5rem;min-height:1rem;font-weight:500}
+/* INPUT VALIDATION */
+.cf input.invalid{border-color:var(--red)!important;background:#FDE8E8}
+.cf input.invalid::placeholder{color:var(--red);opacity:.7}
+.field-required{font-size:.55rem;color:var(--red);font-weight:600;margin-left:3px}
+
 /* PRINT */
 @media print{
   body>*:not(#printReport){display:none!important}
@@ -367,8 +392,8 @@ header{background:var(--white);border-bottom:1px solid var(--border);height:56px
     <button class="cd-close" onclick="closeCart()">&#10005;</button>
   </div>
   <div class="cd-customer">
-    <div class="cf"><label>Customer Name</label><input type="text" id="custName" placeholder="e.g. Ram Bahadur"></div>
-    <div class="cf"><label>Table #</label><input type="number" id="tableNo" placeholder="1" min="1"></div>
+    <div class="cf"><label>Customer Name <span class="field-required">*</span></label><input type="text" id="custName" placeholder="Required" oninput="this.classList.remove('invalid')"></div>
+    <div class="cf"><label>Table # <span class="field-required">*</span></label><input type="number" id="tableNo" placeholder="Required" min="1" oninput="this.classList.remove('invalid')"></div>
   </div>
   <div class="cd-list" id="cartList">
     <div class="empty-cart"><div class="big">&#128722;</div><div>Cart is empty</div><div style="font-size:.66rem;margin-top:2px">Tap any item to add</div></div>
@@ -427,6 +452,36 @@ header{background:var(--white);border-bottom:1px solid var(--border);height:56px
     <div class="full-panel-body" id="sales-history-panel" style="display:none">
       <div id="salesHistoryList"><div class="no-data">Loading past days...</div></div>
     </div>
+  </div>
+</div>
+
+
+<!-- PIN LOGIN OVERLAY -->
+<div id="pinOverlay">
+  <div class="pin-box">
+    <div class="pin-logo">&#9749;</div>
+    <div class="pin-title">Trio's Cafe</div>
+    <div class="pin-sub">ENTER STAFF PIN TO CONTINUE</div>
+    <div class="pin-dots">
+      <div class="pin-dot" id="pd0"></div>
+      <div class="pin-dot" id="pd1"></div>
+      <div class="pin-dot" id="pd2"></div>
+      <div class="pin-dot" id="pd3"></div>
+    </div>
+    <div class="pin-grid">
+      <button class="pin-key" onclick="pinPress('1')">1</button>
+      <button class="pin-key" onclick="pinPress('2')">2</button>
+      <button class="pin-key" onclick="pinPress('3')">3</button>
+      <button class="pin-key" onclick="pinPress('4')">4</button>
+      <button class="pin-key" onclick="pinPress('5')">5</button>
+      <button class="pin-key" onclick="pinPress('6')">6</button>
+      <button class="pin-key" onclick="pinPress('7')">7</button>
+      <button class="pin-key" onclick="pinPress('8')">8</button>
+      <button class="pin-key" onclick="pinPress('9')">9</button>
+      <button class="pin-key zero" onclick="pinPress('0')">0</button>
+    </div>
+    <button class="pin-clear" onclick="pinClear()">&#9003; Clear</button>
+    <div class="pin-error" id="pinError"></div>
   </div>
 </div>
 
@@ -770,6 +825,20 @@ function closeCart(){document.getElementById('cartOverlay').classList.remove('sh
 
 function placeOrder(){
   if(!cart.length){alert('Please add items first!');return;}
+  const _name=document.getElementById('custName').value.trim();
+  const _table=document.getElementById('tableNo').value.trim();
+  let _valid=true;
+  if(!_name){document.getElementById('custName').classList.add('invalid');_valid=false;}
+  if(!_table){document.getElementById('tableNo').classList.add('invalid');_valid=false;}
+  if(!_valid){
+    if(!_name){document.getElementById('custName').focus();}
+    else{document.getElementById('tableNo').focus();}
+    // shake the cart footer
+    const foot=document.querySelector('.cd-foot');
+    foot.style.animation='none';foot.offsetHeight;
+    foot.style.animation='shakeX .35s ease';
+    return;
+  }
   const name=document.getElementById('custName').value.trim()||'Guest';
   const table=document.getElementById('tableNo').value||'—';
   const total=cart.reduce((s,c)=>s+c.price*c.qty,0);
@@ -995,6 +1064,58 @@ function checkRollover(){
   _lastDate=today;
 }
 setInterval(checkRollover,60000);
+
+
+// ── PIN LOGIN ──
+const PIN_CODE = '7891';
+let pinEntry = '';
+
+function pinPress(digit) {
+  if (pinEntry.length >= 4) return;
+  pinEntry += digit;
+  updatePinDots();
+  if (pinEntry.length === 4) {
+    setTimeout(() => checkPin(), 120);
+  }
+}
+
+function updatePinDots(state) {
+  for (let i = 0; i < 4; i++) {
+    const dot = document.getElementById('pd' + i);
+    dot.className = 'pin-dot';
+    if (state === 'error') dot.classList.add('error');
+    else if (i < pinEntry.length) dot.classList.add('filled');
+  }
+}
+
+function checkPin() {
+  if (pinEntry === PIN_CODE) {
+    document.getElementById('pinOverlay').style.opacity = '0';
+    document.getElementById('pinOverlay').style.transition = 'opacity .4s';
+    setTimeout(() => { document.getElementById('pinOverlay').style.display = 'none'; }, 400);
+  } else {
+    updatePinDots('error');
+    document.getElementById('pinError').textContent = 'Incorrect PIN. Try again.';
+    setTimeout(() => {
+      pinEntry = '';
+      updatePinDots();
+      document.getElementById('pinError').textContent = '';
+    }, 900);
+  }
+}
+
+function pinClear() {
+  pinEntry = '';
+  updatePinDots();
+  document.getElementById('pinError').textContent = '';
+}
+
+// Allow keyboard input on PIN screen
+document.addEventListener('keydown', (e) => {
+  if (document.getElementById('pinOverlay').style.display === 'none') return;
+  if (e.key >= '0' && e.key <= '9') pinPress(e.key);
+  if (e.key === 'Backspace') { pinEntry = pinEntry.slice(0,-1); updatePinDots(); }
+});
 
 renderGrid(MENU.momo.items);
 renderCart();
